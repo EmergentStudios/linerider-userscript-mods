@@ -1,2 +1,3 @@
-# linerider-mods
-Userscript mods for Line Rider
+# linerider-userscript-mods
+
+Userscript mods for Line Rider.
