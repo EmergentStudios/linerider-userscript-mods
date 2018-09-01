@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Line Rider Selection Shader Mod
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Adds ability to shade in selections
 // @author       David Lu
 // @match        https://www.linerider.com/*
@@ -9,6 +9,7 @@
 // @grant        none
 // @require      https://wzrd.in/standalone/lodash.sortedindex@latest
 // @require      https://wzrd.in/standalone/lodash.sortedindexby@latest
+// @downloadURL  https://github.com/EmergentStudios/linerider-userscript-mods/raw/master/selection-shader-mod.user.js
 // ==/UserScript==
 
 // jshint asi: true
@@ -37,12 +38,13 @@ const setToolState = (toolId, state) => ({
 
 const setSelectToolState = toolState => setToolState(SELECT_TOOL, toolState)
 
-const updateLines = (linesToRemove, linesToAdd) => ({
+const updateLines = (linesToRemove, linesToAdd, name) => ({
   type: 'UPDATE_LINES',
-  payload: { linesToRemove, linesToAdd }
+  payload: { linesToRemove, linesToAdd },
+  meta: { name: name }
 })
 
-const addLines = (line) => updateLines(null, line)
+const addLines = (line) => updateLines(null, line, 'ADD_LINES')
 
 const commitTrackChanges = () => ({
   type: 'COMMIT_TRACK_CHANGES'
@@ -115,6 +117,13 @@ class ShadeMod {
 
   onUpdate (nextState = this.state) {
     let shouldUpdate = false
+
+    if (!this.state.active && nextState.active) {
+      window.previewLinesInFastSelect = true
+    }
+    if (this.state.active && !nextState.active) {
+      window.previewLinesInFastSelect = false
+    }
 
     if (this.state !== nextState) {
       this.state = nextState
