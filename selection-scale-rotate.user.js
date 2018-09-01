@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Line Rider Selection Rotate and Scale Mod
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Adds ability to rotate and scale selections
 // @author       David Lu
 // @match        https://www.linerider.com/*
 // @match        https://*.linerider.io/*
+// @downloadURL  https://github.com/EmergentStudios/linerider-userscript-mods/raw/master/selection-scale-rotate.user.js
 // @grant        none
 // ==/UserScript==
 
@@ -38,11 +39,17 @@ const revertTrackChanges = () => ({
   type: 'REVERT_TRACK_CHANGES'
 })
 
+const setEditScene = (scene) => ({
+  type: 'SET_RENDERER_SCENE',
+  payload: { key: 'edit', scene }
+})
+
 /* selectors */
 const getActiveTool = state => state.selectedTool
 const getToolState = (state, toolId) => state.toolState[toolId]
 const getSelectToolState = state => getToolState(state, SELECT_TOOL)
 const getSimulatorCommittedTrack = state => state.simulator.committedEngine
+const getEditorZoom = state => state.camera.editorZoom
 
 class ScaleRotateMod {
   constructor (store, initState) {
@@ -108,7 +115,12 @@ class ScaleRotateMod {
           .map(id => this.track.getLine(id))
           .filter(l => l)
 
-        const c = getBoundingBoxCenter(selectedLines)
+        const {x, y, width, height} = getBoundingBox(selectedLines)
+        const c = new V2({
+          x: x + width / 2,
+          y: y + height / 2
+        })
+
         const transform = this.getTransform()
         const transformedLines = []
 
@@ -126,6 +138,19 @@ class ScaleRotateMod {
         }
 
         this.store.dispatch(setLines(transformedLines))
+
+        const zoom = getEditorZoom(this.store.getState())
+        const renderedBox = genBoxOutline(x, y, x + width, y + height, 1 / zoom, new Millions.Color(0, 0, 0, 255), 0)
+
+        for (let line of renderedBox) {
+          const p1 = new V2(line.p1).sub(c).transform(transform).add(c)
+          const p2 = new V2(line.p2).sub(c).transform(transform).add(c)
+          line.p1.x = p1.x
+          line.p1.y = p1.y
+          line.p2.x = p2.x
+          line.p2.y = p2.y
+        }
+        this.store.dispatch(setEditScene(Millions.Scene.fromEntities(renderedBox)))
         this.changed = true
       }
     }
@@ -289,16 +314,6 @@ function parseFloatOrDefault (string, defaultValue = 0) {
   return isNaN(x) ? defaultValue : x
 }
 
-function getBoundingBoxCenter (lines) {
-  const { V2 } = window
-
-  const {x, y, width, height} = getBoundingBox(lines)
-  return new V2({
-    x: x + width / 2,
-    y: y + height / 2
-  })
-}
-
 function getBoundingBox (lines) {
   if (lines.size === 0) {
     return {
@@ -331,4 +346,32 @@ function getBoundingBox (lines) {
     width: maxX - minX,
     height: maxY - minY
   }
+}
+
+function genLine (x1, y1, x2, y2, thickness, color, zIndex) {
+  let p1 = {
+    x: x1,
+    y: y1,
+    colorA: color,
+    colorB: color,
+    thickness
+  }
+  let p2 = {
+    x: x2,
+    y: y2,
+    colorA: color,
+    colorB: color,
+    thickness
+  }
+  return new Millions.Line(p1, p2, 1, zIndex)
+}
+
+
+function genBoxOutline (x1, y1, x2, y2, thickness, color, zIndex) {
+  return [
+    genLine(x1, y1, x1, y2, thickness, color, zIndex),
+    genLine(x1, y2, x2, y2, thickness, color, zIndex + 0.1),
+    genLine(x2, y2, x2, y1, thickness, color, zIndex + 0.2),
+    genLine(x2, y1, x1, y1, thickness, color, zIndex + 0.3)
+  ]
 }
