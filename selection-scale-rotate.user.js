@@ -363,7 +363,7 @@ function genLine (x1, y1, x2, y2, thickness, color, zIndex) {
     colorB: color,
     thickness
   }
-  return new Millions.Line(p1, p2, 1, zIndex)
+  return new Millions.Line(p1, p2, 3, zIndex)
 }
 
 
