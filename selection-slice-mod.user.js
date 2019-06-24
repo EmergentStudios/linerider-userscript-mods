@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Line Rider Selection Slice Mod
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  Adds ability to slice lines with a selection
 // @author       David Lu
 // @match        https://www.linerider.com/*

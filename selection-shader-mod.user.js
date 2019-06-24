@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Line Rider Selection Shader Mod
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  Adds ability to shade in selections
 // @author       David Lu
 // @match        https://www.linerider.com/*
