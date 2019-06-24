@@ -7,8 +7,8 @@
 // @match        https://www.linerider.com/*
 // @match        https://*.linerider.io/*
 // @grant        none
-// @require      https://wzrd.in/standalone/lodash.sortedindex@latest
-// @require      https://wzrd.in/standalone/lodash.sortedindexby@latest
+// @require      https://raw.githubusercontent.com/EmergentStudios/linerider-userscript-mods/master/lib/sortedindex.js
+// @require      https://raw.githubusercontent.com/EmergentStudios/linerider-userscript-mods/master/lib/sortedindexby.js
 // @downloadURL  https://github.com/EmergentStudios/linerider-userscript-mods/raw/master/selection-slice-mod.user.js
 // ==/UserScript==
 
