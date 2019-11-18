@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Line Rider Custom Tools API
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Allows linerider.com to be modded
 // @author       David Lu
 // @match        https://www.linerider.com/*

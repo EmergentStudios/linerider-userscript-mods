@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Line Rider Bezier Tool
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Adds tool to create bezier curves
 // @author       David Lu
 // @match        https://www.linerider.com/*

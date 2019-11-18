@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Line Rider Selection Rotate and Scale Mod
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Adds ability to rotate and scale selections
 // @author       David Lu
 // @match        https://www.linerider.com/*
