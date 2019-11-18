@@ -5,7 +5,8 @@
 // @description  Adds tool to create bezier curves
 // @author       David Lu
 // @match        https://www.linerider.com/*
-// @match        https://*.linerider.io/*
+// @match        https://*.official-linerider.com/*
+// @match        http://localhost:8000/*
 // @grant        none
 // @require      https://raw.githubusercontent.com/EmergentStudios/linerider-userscript-mods/master/lib/adaptive-bezier-curve.js
 // ==/UserScript==

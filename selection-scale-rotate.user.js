@@ -5,7 +5,8 @@
 // @description  Adds ability to rotate and scale selections
 // @author       David Lu
 // @match        https://www.linerider.com/*
-// @match        https://*.linerider.io/*
+// @match        https://*.official-linerider.com/*
+// @match        http://localhost:8000/*
 // @downloadURL  https://github.com/EmergentStudios/linerider-userscript-mods/raw/master/selection-scale-rotate.user.js
 // @grant        none
 // ==/UserScript==

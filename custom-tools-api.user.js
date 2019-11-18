@@ -5,7 +5,8 @@
 // @description  Allows linerider.com to be modded
 // @author       David Lu
 // @match        https://www.linerider.com/*
-// @match        https://*.linerider.io/*
+// @match        https://*.official-linerider.com/*
+// @match        http://localhost:8000/*
 // @grant        none
 // ==/UserScript==
 
