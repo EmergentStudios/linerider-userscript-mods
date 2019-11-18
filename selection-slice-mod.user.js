@@ -167,7 +167,14 @@ class SliceMod {
           .filter(l => l))
 
         let track = this.track
-        const selectLinesInRect = rect => track.selectLinesInRect(rect)
+        const selectLinesInRect = rect => {
+          const lines = track.selectLinesInRect(rect)
+          if (getTrackLinesLocked(this.store.getState())) {
+            return lines.filter(line => !line.collidable)
+          } else {
+            return lines
+          }
+        }
 
         this.changed = performSlice(
           selectedLines,
