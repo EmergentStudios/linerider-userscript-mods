@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Line Rider Selection Rotate and Scale Mod
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  Adds ability to rotate and scale selections
 // @author       David Lu
 // @match        https://www.linerider.com/*
@@ -71,6 +71,7 @@ class ScaleRotateMod {
     if (this.changed) {
       this.store.dispatch(commitTrackChanges())
       this.store.dispatch(revertTrackChanges())
+      this.store.dispatch(setEditScene(new Millions.Scene()))
       this.changed = false
       return true
     }
@@ -108,10 +109,11 @@ class ScaleRotateMod {
     if (shouldUpdate) {
       if (this.changed) {
         this.store.dispatch(revertTrackChanges())
+        this.store.dispatch(setEditScene(new Millions.Scene()))
         this.changed = false
       }
 
-      if (this.state.active && this.selectedPoints.size > 0 && (this.state.scale !== 1 || this.state.rotate !== 0)) {
+      if (this.state.active && this.selectedPoints.size > 0 && (this.state.scale !== 1 || this.state.scaleX !== 1 || this.state.scaleY !== 1 || this.state.rotate !== 0)) {
         const selectedLines = [...getLinesFromPoints(this.selectedPoints)]
           .map(id => this.track.getLine(id))
           .filter(l => l)
@@ -161,6 +163,8 @@ class ScaleRotateMod {
     const transform = rotateTransform(this.state.rotate * Math.PI / 180)
     transform[0] *= this.state.scale
     transform[3] *= this.state.scale
+    transform[0] *= this.state.scaleX
+    transform[3] *= this.state.scaleY
     return transform
   }
 }
@@ -180,6 +184,8 @@ function main () {
       this.state = {
         active: false,
         scale: 1,
+        scaleX: 1,
+        scaleY: 1,
         rotate: 0,
       }
 
@@ -197,6 +203,8 @@ function main () {
         this.scaleRotateMod.commit()
         this.setState({
           scale: 1,
+          scaleX: 1,
+          scaleY: 1,
           rotate: 0
         })
       }
@@ -250,6 +258,8 @@ function main () {
       return e('div',
         null,
         this.state.active && e('div', null,
+          this.renderSlider('scaleX', { min: 0, max: 2, step: 0.01 }),
+          this.renderSlider('scaleY', { min: 0, max: 2, step: 0.01 }),
           this.renderSlider('scale', { min: 0, max: 2, step: 0.01 }),
           this.renderSlider('rotate', { min: -180, max: 180, step: 1 })
         ),
