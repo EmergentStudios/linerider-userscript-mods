@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Line Rider Bezier Tool
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  Adds tool to create bezier curves
 // @author       David Lu
 // @match        https://www.linerider.com/*
@@ -13,6 +13,11 @@
 
 // jshint asi: true
 // jshint esversion: 6
+
+function parseFloatOrDefault (string, defaultValue = 0) {
+  const x = parseFloat(string)
+  return isNaN(x) ? defaultValue : x
+}
 
 const bezier = window.adaptiveBezierCurve;
 const TOOL_ID = "Bezier Tool";
@@ -451,6 +456,38 @@ function main() {
     constructor(store) {
       super(store);
 
+      this.flipped = window.bezierToolFlipped || false
+      Object.defineProperty(window, 'bezierToolFlipped', {
+        configurable: true,
+        get: () => this.flipped,
+        set: f => {
+          this.flipped = f
+
+          const state = getBezierToolState(this.getState());
+
+          if (state instanceof EditState) {
+            this.dispatch(revertTrackChanges());
+            this.addCurve(state);
+          }
+        }
+      })
+
+      this.radius = window.bezierToolRadius || 0
+      Object.defineProperty(window, 'bezierToolRadius', {
+        configurable: true,
+        get: () => this.radius,
+        set: r => {
+          this.radius = r
+
+          const state = getBezierToolState(this.getState());
+
+          if (state instanceof EditState) {
+            this.dispatch(revertTrackChanges());
+            this.addCurve(state);
+          }
+        }
+      })
+
       this.dispatch(setBezierToolState(new InitState()));
     }
 
@@ -545,15 +582,39 @@ function main() {
 
       const lines = [];
       let prevPoint = points.shift();
+      let prevNorm = V2.from(s.c1.x - s.p1.x, s.c1.y - s.p1.y).rotCW().norm().mul(this.radius)
       const type = getSelectedLineType(this.getState());
       for (let p of points) {
-        lines.push({
-          x1: prevPoint[0],
-          y1: prevPoint[1],
-          x2: p[0],
-          y2: p[1],
-          type
-        });
+        if (this.radius === 0) {
+          lines.push({
+            flipped: this.flipped,
+            x1: prevPoint[0],
+            y1: prevPoint[1],
+            x2: p[0],
+            y2: p[1],
+            type
+          });
+        } else {
+          const norm = V2.from(p[0] - prevPoint[0], p[1] - prevPoint[1]).rotCW().norm().mul(this.radius)
+
+          lines.push({
+            flipped: this.flipped,
+            x1: prevPoint[0] - prevNorm.x,
+            y1: prevPoint[1] - prevNorm.y,
+            x2: p[0] - norm.x,
+            y2: p[1] - norm.y,
+            type
+          }, {
+            flipped: !this.flipped,
+            x1: prevPoint[0] + prevNorm.x,
+            y1: prevPoint[1] + prevNorm.y,
+            x2: p[0] + norm.x,
+            y2: p[1] + norm.y,
+            type
+          });
+
+          prevNorm = norm
+        }
         prevPoint = p;
       }
       this.dispatch(addLines(lines));
@@ -576,8 +637,13 @@ function main() {
       this.state = {
         count: 0,
         changed: false,
-        status: "Not Connected"
+        status: "Not Connected",
+        radius: 0,
+        flipped: false
       };
+
+      window.bezierToolRadius = 0
+      window.bezierToolFlipped = false
 
       store.subscribe(() => {
         const changed =
@@ -601,9 +667,28 @@ function main() {
     }
 
     render() {
+      const onRadiusChange = e => {
+        const radius = parseFloatOrDefault(e.target.value);
+        this.setState({ radius })
+        window.bezierToolRadius = radius
+      }
+      const onFlippedChange = () => {
+        const flipped = !this.state.flipped
+        this.setState({flipped})
+        window.bezierToolFlipped = flipped
+      }
       return e("div", null, [
         "Bezier Tool",
         e("div", null, [
+          e('label', null,
+            'Flip',
+            e('input', { type: 'checkbox', checked: this.state.flipped, onClick: onFlippedChange })
+          ),
+          e('div', null,
+            'Radius',
+            e('input', { style: { width: '3em' }, type: 'number', onChange: onRadiusChange, min: 0, value: this.state.radius }),
+            e('input', { type: 'range', onChange: onRadiusChange, onFocus: e => e.target.blur(), min: 0, max: 20, step: 0.1, value: this.state.radius })
+          ),
           e(
             "button",
             {
