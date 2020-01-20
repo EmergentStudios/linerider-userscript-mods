@@ -8,4 +8,4 @@ Userscript mods for Line Rider. May potentially end up being unmaintained.
 2. To install mods from this repo, click on the mod file and then click "Raw" to bring up the install page
 3. You have to install `custom-tools-api.user.js` before any of the other tool mods will work
 
-Here's a screencap of installing and using some mods: https://streamable.com/v4wzx
+Here's a video explaining how to install mods: https://streamable.com/v4wzx
