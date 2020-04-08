@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Line Rider Custom Tools API
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  Allows linerider.com to be modded
 // @author       David Lu
 // @match        https://www.linerider.com/*
@@ -24,9 +24,6 @@ const getActiveTool = state => state.selectedTool
 const getPlayerRunning = state => state.player.running
 
 function main () {
-  // TODO: properly expose V2
-  window.V2 = window.store.getState().simulator.engine.engine.state.startPoint.constructor
-
   const {
     React,
     ReactDOM,
