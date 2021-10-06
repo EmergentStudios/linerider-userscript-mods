@@ -208,15 +208,6 @@ function main () {
           rotate: 0
         })
       }
-      this.onMouseCommit = () => {
-        this.onCommit()
-        window.removeEventListener('mouseup', this.onMouseCommit)
-      }
-      this.onKeyCommit = e => {
-        if (e.key === 'Enter') {
-          this.onCommit()
-        }
-      }
     }
 
     componentWillUpdate (nextProps, nextState) {
@@ -251,6 +242,9 @@ function main () {
         key,
         e('input', { style: { width: '3em' }, type: 'number', ...numberProps }),
         e('input', { type: 'range', ...rangeProps, onFocus: e => e.target.blur() })
+        e('button', { style: { float: 'left' }, onClick: () => this.onCommit() },
+            'Commit'
+        )
       )
     }
 
