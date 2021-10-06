@@ -230,13 +230,10 @@ function main () {
         onChange: e => this.setState({ [key]: parseFloatOrDefault(e.target.value) })
       }
       const rangeProps = {
-        ...props,
-        onMouseDown: () => window.addEventListener('mouseup', this.onMouseCommit)
+        ...props
       }
       const numberProps = {
-        ...props,
-        onKeyUp: this.onKeyCommit,
-        onBlur: this.onCommit
+        ...props
       }
       return e('div', null,
         key,
