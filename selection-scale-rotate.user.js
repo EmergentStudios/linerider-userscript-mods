@@ -239,9 +239,6 @@ function main () {
         key,
         e('input', { style: { width: '3em' }, type: 'number', ...numberProps }),
         e('input', { type: 'range', ...rangeProps, onFocus: e => e.target.blur() }),
-        e('button', { style: { float: 'left' }, onClick: () => this.onCommit() },
-            'Commit'
-        )
       )
     }
 
@@ -252,7 +249,10 @@ function main () {
           this.renderSlider('scaleX', { min: 0, max: 2, step: 0.01 }),
           this.renderSlider('scaleY', { min: 0, max: 2, step: 0.01 }),
           this.renderSlider('scale', { min: 0, max: 2, step: 0.01 }),
-          this.renderSlider('rotate', { min: -180, max: 180, step: 1 })
+          this.renderSlider('rotate', { min: -180, max: 180, step: 1 }),
+          e('button', { style: { float: 'left' }, onClick: () => this.onCommit() },
+              'Commit'
+          )
         ),
         e('button',
           {
