@@ -206,6 +206,18 @@ function main () {
         }
       })
 
+      this.onReset = (key) => {
+        const defaults = {
+          scale: 1,
+          scaleX: 1,
+          scaleY: 1,
+          rotate: 0
+        }
+        let changedState = {}
+        changedState[key] = defaults[key]
+        this.setState(changedState)
+      }
+
       this.onCommit = () => {
         this.scaleRotateMod.commit()
         this.setState({
@@ -245,7 +257,8 @@ function main () {
       return e('div', null,
         key,
         e('input', { style: { width: '3em' }, type: 'number', ...numberProps }),
-        e('input', { type: 'range', ...rangeProps, onFocus: e => e.target.blur() })
+        e('input', { type: 'range', ...rangeProps, onFocus: e => e.target.blur() }),
+        e('button', { onClick: () => this.onReset(key) }, 'Reset')
       )
     }
 
