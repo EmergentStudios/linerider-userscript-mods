@@ -160,6 +160,9 @@ class ScaleRotateMod {
   }
 
   getTransform() {
+    // The resulting transform is equivalent to the product of a scaling matrix
+    // followed by a rotation matrix. Refer to
+    // https://www.wolframalpha.com/input/?i=%7B%7Bx+*+s%2C+0%7D%2C+%7B0%2C+y+*+s%7D%7D+.+%7B%7Bcos+theta%2C+sin+theta%7D%2C+%7B-sin+theta%2C+cos+theta%7D%7D
     const transform = rotateTransform(this.state.rotate * Math.PI / 180)
     transform[0] *= this.state.scale
     transform[1] *= this.state.scale
