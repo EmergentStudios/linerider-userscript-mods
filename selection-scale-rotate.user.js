@@ -238,7 +238,7 @@ function main () {
       return e('div', null,
         key,
         e('input', { style: { width: '3em' }, type: 'number', ...numberProps }),
-        e('input', { type: 'range', ...rangeProps, onFocus: e => e.target.blur() }),
+        e('input', { type: 'range', ...rangeProps, onFocus: e => e.target.blur() })
       )
     }
 
