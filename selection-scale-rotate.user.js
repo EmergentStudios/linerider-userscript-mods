@@ -162,8 +162,12 @@ class ScaleRotateMod {
   getTransform() {
     const transform = rotateTransform(this.state.rotate * Math.PI / 180)
     transform[0] *= this.state.scale
+    transform[1] *= this.state.scale
+    transform[2] *= this.state.scale
     transform[3] *= this.state.scale
     transform[0] *= this.state.scaleX
+    transform[1] *= this.state.scaleX
+    transform[2] *= this.state.scaleY
     transform[3] *= this.state.scaleY
     return transform
   }
