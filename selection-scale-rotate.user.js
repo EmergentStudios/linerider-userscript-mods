@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         Line Rider Selection Rotate and Scale Mod
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.5
 // @description  Adds ability to rotate and scale selections
-// @author       David Lu
+// @author       David Lu & Ethan Li
 // @match        https://www.linerider.com/*
 // @match        https://*.official-linerider.com/*
 // @match        http://localhost:8000/*
-// @downloadURL  https://github.com/EmergentStudios/linerider-userscript-mods/raw/master/selection-scale-rotate.user.js
+// @downloadURL  https://github.com/ethanjli/linerider-userscript-mods/raw/master/selection-scale-rotate.user.js
 // @grant        none
 // ==/UserScript==
 
