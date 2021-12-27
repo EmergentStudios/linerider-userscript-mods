@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Line Rider Selection Rotate and Scale Mod
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.5.1
 // @description  Adds ability to rotate and scale selections
-// @author       David Lu
+// @author       David Lu & Ethan Li
 // @match        https://www.linerider.com/*
 // @match        https://*.official-linerider.com/*
 // @match        http://localhost:8000/*
@@ -113,7 +113,7 @@ class ScaleRotateMod {
         this.changed = false
       }
 
-      if (this.state.active && this.selectedPoints.size > 0 && (this.state.scale !== 1 || this.state.scaleX !== 1 || this.state.scaleY !== 1 || this.state.rotate !== 0)) {
+      if (this.state.active && this.selectedPoints.size > 0 && (this.state.scale !== 1 || this.state.scaleX !== 1 || this.state.scaleY !== 1 || this.state.flipX || this.state.flipY || this.state.rotate !== 0)) {
         const selectedLines = [...getLinesFromPoints(this.selectedPoints)]
           .map(id => this.track.getLine(id))
           .filter(l => l)
@@ -160,11 +160,26 @@ class ScaleRotateMod {
   }
 
   getTransform() {
+    // The resulting transform is equivalent to the product of a scaling matrix
+    // followed by a rotation matrix. Refer to
+    // https://www.wolframalpha.com/input/?i=%7B%7Bx+*+s%2C+0%7D%2C+%7B0%2C+y+*+s%7D%7D+.+%7B%7Bcos+theta%2C+sin+theta%7D%2C+%7B-sin+theta%2C+cos+theta%7D%7D
     const transform = rotateTransform(this.state.rotate * Math.PI / 180)
     transform[0] *= this.state.scale
+    transform[1] *= this.state.scale
+    transform[2] *= this.state.scale
     transform[3] *= this.state.scale
-    transform[0] *= this.state.scaleX
-    transform[3] *= this.state.scaleY
+    let scaleX = this.state.scaleX
+    if (this.state.flipX) {
+        scaleX *= -1
+    }
+    let scaleY = this.state.scaleY
+    if (this.state.flipY) {
+        scaleY *= -1
+    }
+    transform[0] *= scaleX
+    transform[1] *= scaleX
+    transform[2] *= scaleY
+    transform[3] *= scaleY
     return transform
   }
 }
@@ -186,6 +201,8 @@ function main () {
         scale: 1,
         scaleX: 1,
         scaleY: 1,
+        flipX: false,
+        flipY: false,
         rotate: 0,
       }
 
@@ -199,23 +216,30 @@ function main () {
         }
       })
 
+      this.onReset = (key) => {
+        const defaults = {
+          scale: 1,
+          scaleX: 1,
+          scaleY: 1,
+          flipX: false,
+          flipY: false,
+          rotate: 0
+        }
+        let changedState = {}
+        changedState[key] = defaults[key]
+        this.setState(changedState)
+      }
+
       this.onCommit = () => {
         this.scaleRotateMod.commit()
         this.setState({
           scale: 1,
           scaleX: 1,
           scaleY: 1,
+          flipX: false,
+          flipY: false,
           rotate: 0
         })
-      }
-      this.onMouseCommit = () => {
-        this.onCommit()
-        window.removeEventListener('mouseup', this.onMouseCommit)
-      }
-      this.onKeyCommit = e => {
-        if (e.key === 'Enter') {
-          this.onCommit()
-        }
       }
     }
 
@@ -232,6 +256,18 @@ function main () {
       }
     }
 
+    renderCheckbox (key, props) {
+      props = {
+        ...props,
+        checked: this.state[key],
+        onChange: e => this.setState({ [key]: e.target.checked })
+      }
+      return e('div', null,
+        key,
+        e('input', { type: 'checkbox', ...props })
+      )
+    }
+
     renderSlider (key, props) {
       props = {
         ...props,
@@ -239,18 +275,16 @@ function main () {
         onChange: e => this.setState({ [key]: parseFloatOrDefault(e.target.value) })
       }
       const rangeProps = {
-        ...props,
-        onMouseDown: () => window.addEventListener('mouseup', this.onMouseCommit)
+        ...props
       }
       const numberProps = {
-        ...props,
-        onKeyUp: this.onKeyCommit,
-        onBlur: this.onCommit
+        ...props
       }
       return e('div', null,
         key,
         e('input', { style: { width: '3em' }, type: 'number', ...numberProps }),
-        e('input', { type: 'range', ...rangeProps, onFocus: e => e.target.blur() })
+        e('input', { type: 'range', ...rangeProps, onFocus: e => e.target.blur() }),
+        e('button', { onClick: () => this.onReset(key) }, 'Reset')
       )
     }
 
@@ -258,10 +292,15 @@ function main () {
       return e('div',
         null,
         this.state.active && e('div', null,
+          this.renderCheckbox('flipX', { min: 0, max: 2, step: 0.01 }),
+          this.renderCheckbox('flipY', { min: 0, max: 2, step: 0.01 }),
           this.renderSlider('scaleX', { min: 0, max: 2, step: 0.01 }),
           this.renderSlider('scaleY', { min: 0, max: 2, step: 0.01 }),
           this.renderSlider('scale', { min: 0, max: 2, step: 0.01 }),
-          this.renderSlider('rotate', { min: -180, max: 180, step: 1 })
+          this.renderSlider('rotate', { min: -180, max: 180, step: 1 }),
+          e('button', { style: { float: 'left' }, onClick: () => this.onCommit() },
+              'Commit'
+          )
         ),
         e('button',
           {
