@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         Line Rider Selection Rotate and Scale Mod
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.5.1
 // @description  Adds ability to rotate and scale selections
 // @author       David Lu & Ethan Li
 // @match        https://www.linerider.com/*
 // @match        https://*.official-linerider.com/*
 // @match        http://localhost:8000/*
-// @downloadURL  https://github.com/ethanjli/linerider-userscript-mods/raw/master/selection-scale-rotate.user.js
+// @downloadURL  https://github.com/EmergentStudios/linerider-userscript-mods/raw/master/selection-scale-rotate.user.js
 // @grant        none
 // ==/UserScript==
 
@@ -113,7 +113,7 @@ class ScaleRotateMod {
         this.changed = false
       }
 
-      if (this.state.active && this.selectedPoints.size > 0 && (this.state.scale !== 1 || this.state.scaleX !== 1 || this.state.scaleY !== 1 || this.state.rotate !== 0)) {
+      if (this.state.active && this.selectedPoints.size > 0 && (this.state.scale !== 1 || this.state.scaleX !== 1 || this.state.scaleY !== 1 || this.state.flipX || this.state.flipY || this.state.rotate !== 0)) {
         const selectedLines = [...getLinesFromPoints(this.selectedPoints)]
           .map(id => this.track.getLine(id))
           .filter(l => l)
@@ -168,10 +168,18 @@ class ScaleRotateMod {
     transform[1] *= this.state.scale
     transform[2] *= this.state.scale
     transform[3] *= this.state.scale
-    transform[0] *= this.state.scaleX
-    transform[1] *= this.state.scaleX
-    transform[2] *= this.state.scaleY
-    transform[3] *= this.state.scaleY
+    let scaleX = this.state.scaleX
+    if (this.state.flipX) {
+        scaleX *= -1
+    }
+    let scaleY = this.state.scaleY
+    if (this.state.flipY) {
+        scaleY *= -1
+    }
+    transform[0] *= scaleX
+    transform[1] *= scaleX
+    transform[2] *= scaleY
+    transform[3] *= scaleY
     return transform
   }
 }
@@ -193,6 +201,8 @@ function main () {
         scale: 1,
         scaleX: 1,
         scaleY: 1,
+        flipX: false,
+        flipY: false,
         rotate: 0,
       }
 
@@ -211,6 +221,8 @@ function main () {
           scale: 1,
           scaleX: 1,
           scaleY: 1,
+          flipX: false,
+          flipY: false,
           rotate: 0
         }
         let changedState = {}
@@ -224,6 +236,8 @@ function main () {
           scale: 1,
           scaleX: 1,
           scaleY: 1,
+          flipX: false,
+          flipY: false,
           rotate: 0
         })
       }
@@ -240,6 +254,18 @@ function main () {
         store.dispatch(setTool(SELECT_TOOL))
         this.setState({ active: true })
       }
+    }
+
+    renderCheckbox (key, props) {
+      props = {
+        ...props,
+        checked: this.state[key],
+        onChange: e => this.setState({ [key]: e.target.checked })
+      }
+      return e('div', null,
+        key,
+        e('input', { type: 'checkbox', ...props })
+      )
     }
 
     renderSlider (key, props) {
@@ -266,6 +292,8 @@ function main () {
       return e('div',
         null,
         this.state.active && e('div', null,
+          this.renderCheckbox('flipX', { min: 0, max: 2, step: 0.01 }),
+          this.renderCheckbox('flipY', { min: 0, max: 2, step: 0.01 }),
           this.renderSlider('scaleX', { min: 0, max: 2, step: 0.01 }),
           this.renderSlider('scaleY', { min: 0, max: 2, step: 0.01 }),
           this.renderSlider('scale', { min: 0, max: 2, step: 0.01 }),
